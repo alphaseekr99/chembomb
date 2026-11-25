@@ -4,3 +4,25 @@ dist/
 .data/
 coverage/
 *.tgz
+
+# Local secrets and credentials
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+.npmrc
+.netrc
+credentials.json
+secrets.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Local database files
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*

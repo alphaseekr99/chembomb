@@ -44,13 +44,24 @@ async function generate(env, store, materialId) {
   const all = await store.list('materials');
   const selected = all.find(material => material.id === materialId);
   must(selected, 'Select an uploaded source.', 404);
-  const ranked = ['teaching', 'worksheet', 'revision', 'answers'];
-  const context = all.filter(material => material.id !== materialId)
-    .sort((a, b) => ranked.indexOf(a.kind) - ranked.indexOf(b.kind)).slice(0, 8)
-    .map(({ name, kind, passages }) => ({ name, kind, passages: passages.slice(0, 8).map(pass => ({
-      reference: pass.reference, text: pass.text.slice(0, 650)
-    })) }));
   const source = { ...selected, passages: selected.passages.slice(0, 40).map(pass => ({ ...pass, text: pass.text.slice(0, 1300) })) };
+  const words = text => new Set((text.toLowerCase().match(/[\p{L}]{5,}/gu) || []).filter(word =>
+    !['question', 'following', 'answer', 'science', 'explain', 'lesson', 'chemistry', 'success', 'criteria'].includes(word)
+  ));
+  const vocabulary = words(source.name + ' ' + source.passages.map(pass => pass.text).join(' '));
+  const similarity = text => [...words(text)].filter(word => vocabulary.has(word)).length;
+  const context = ['teaching', 'worksheet', 'revision', 'answers'].flatMap(kind =>
+    all.filter(material => material.id !== materialId && material.kind === kind).map(material => {
+      const passages = material.passages.map(pass => ({ ...pass, relevance: similarity(pass.text) }))
+        .sort((a, b) => b.relevance - a.relevance).slice(0, 6);
+      return {
+        name: material.name, kind,
+        relevance: similarity(material.name) + passages.reduce((total, pass) => total + pass.relevance, 0),
+        passages: passages.map(pass => ({ reference: pass.reference, text: pass.text.slice(0, 850) }))
+      };
+    }).sort((a, b) => b.relevance - a.relevance).slice(0, 2)
+      .map(({ name, kind, passages }) => ({ name, kind, passages }))
+  );
   const base = (env.AI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
   const response = await fetch(base + '/chat/completions', {
     method: 'POST', signal: AbortSignal.timeout(45000),

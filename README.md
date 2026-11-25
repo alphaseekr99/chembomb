@@ -38,7 +38,7 @@ Copy `.env.example` to `.env` for local settings. Put production settings in the
 
 ## Database and deployment
 
-- **Codex Sites.** The build produces an ES module Worker in `dist/server/index.js` with compiled client assets and declares the hosted D1 binding `DB` in `.openai/hosting.json`. The database schema is in `migrations/0001_game.sql`. The Site’s sharing setting controls who can access the game before entering a room code.
+- **Codex Sites.** The build produces an ES module Worker in `dist/server/index.js` with compiled client assets and declares the hosted D1 binding `DB` in `.openai/hosting.json`. The database schema is in `drizzle/0000_game.sql`. The Site’s sharing setting controls who can access the game before entering a room code.
 - **Supabase/PostgreSQL.** Apply `supabase/schema.sql` in the project SQL editor. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` on the backend. The API switches to Supabase PostgREST for storage. RLS and table grants restrict direct reads and writes to the service role. Rooms use optimistic version checks for atomic updates. Browsers subscribe to game state by polling the API approximately every 650 ms.
 - **Standalone Node host.** Deploy the project to a persistent Node 24 service with `npm ci && npm run build` as the build command and `npm start` as the start command. Let the host supply `PORT`. Use a persistent volume for SQLite on one instance, or use Supabase for shared storage across instances. Serve the hosted instance over HTTPS.
 
@@ -71,6 +71,6 @@ The default course bank contains 74 approved questions over the 16 supplied topi
 | `src/` | React screens, document extraction, pixel art, audio and responsive styles |
 | `server/` | Game state machine, HTTP API, database adapters, content library and question banks |
 | `scripts/` | Local development server and Worker build |
-| `migrations/` | SQLite and D1 schema |
+| `drizzle/` | SQLite and D1 schema |
 | `supabase/schema.sql` | PostgreSQL schema and access grants |
 | `test/` | Server integration tests |

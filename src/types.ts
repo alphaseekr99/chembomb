@@ -19,7 +19,9 @@ export async function api<T>(path: string, payload?: object, token?: string): Pr
     headers: { ...(payload ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: 'Bearer ' + token } : {}) },
     body: payload ? JSON.stringify(payload) : undefined
   });
-  const data = await result.json();
+  const data = await result.json().catch(() => {
+    throw new Error(`The CHEMBOMB API returned an unexpected response (HTTP ${result.status}). Use npm run dev locally or check the deployed API at /api/health.`);
+  });
   if (!result.ok) throw Object.assign(new Error(data.error || 'Could not connect to CHEMBOMB.'), { status: result.status });
   return data as T;
 }

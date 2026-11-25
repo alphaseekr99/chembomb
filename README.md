@@ -42,6 +42,15 @@ Copy `.env.example` to `.env` for local settings. Put production settings in the
 - **Supabase/PostgreSQL.** Apply `supabase/schema.sql` in the project SQL editor. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` on the backend. The API switches to Supabase PostgREST for storage. RLS and table grants restrict direct reads and writes to the service role. Rooms use optimistic version checks for atomic updates. Browsers subscribe to game state by polling the API approximately every 650 ms.
 - **Standalone Node host.** Deploy the project to a persistent Node 24 service with `npm ci && npm run build` as the build command and `npm start` as the start command. Let the host supply `PORT`. Use a persistent volume for SQLite on one instance, or use Supabase for shared storage across instances. Serve the hosted instance over HTTPS.
 
+### Vercel
+
+1. Run `supabase/schema.sql` in the Supabase SQL Editor.
+2. Import the repository into Vercel. Select Node.js 24.x and allow the committed `vercel.json` to configure the build and routes. If you previously overrode the Build Command or Output Directory, clear those overrides or set them to `npm run build:vercel` and `dist-vercel`.
+3. In Vercel’s environment settings, add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to the environments you deploy. Add `ADMIN_KEY` if you want to enable `/admin`.
+4. Deploy, then open `/api/health` on the live domain. It should return JSON containing `"ready":true`. Open the homepage to create a room.
+
+The Vercel function in `api/` serves room and admin requests. Vercel uses Supabase to share game state across function instances.
+
 No external account or API call is needed to run a game locally. Live gameplay never calls the AI provider.
 
 ## Default gameplay rules

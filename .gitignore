@@ -26,3 +26,5 @@ id_ed25519
 *.sqlite-*
 *.sqlite3
 *.sqlite3-*
+
+dist-vercel/
